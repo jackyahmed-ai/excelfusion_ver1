@@ -4,26 +4,210 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>"ExcelFusion"</title> 
+  <!-- Primary Meta Tags -->
+  <title>ExcelFusion - A Better Way to Merge Excel Files</title>
+  <meta name="title" content="ExcelFusion - A Better Way to Merge Excel Files">
+  <meta name="description" content="Combine multiple Excel workbooks (.xlsx) securely, instantly, and with no row limits directly in your browser. Designed for high performance and custom header schema alignments.">
+
+  <!-- Open Graph / Facebook / LinkedIn (Visual Portfolio Cards) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourusername.github.io/excelfusion/"> <!-- Gantilah dengan URL GitHub Pages Anda -->
+  <meta property="og:title" content="ExcelFusion - A Better Way to Merge Excel Files">
+  <meta property="og:description" content="Consolidate multiple spreadsheets instantly and securely in your local browser window. No server database required. Designed with beautiful Climadjust-inspired aesthetics.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&h=630&auto=format&fit=crop">
+
+  <!-- Twitter Card -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="ExcelFusion - A Better Way to Merge Excel Files">
+  <meta property="twitter:description" content="Consolidate multiple spreadsheets instantly and securely in your local browser window. No server database required.">
+  <meta property="twitter:image" content="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&h=630&auto=format&fit=crop">
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     body {
       margin: 0;
       padding: 0;
-      overflow: hidden; /* Biar ga ada scrollbar */
-      background-color: #0d1117; /* Warna background gelap biar pas loading ga silau */
+      overflow: hidden;
+      background-color: #030712; /* Deep dark background to prevent flashing */
+      font-family: 'Inter', sans-serif;
     }
+
+    /* Full-screen loader overlay */
+    #loaderOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 50%, #111827 0%, #030712 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 800ms cubic-bezier(0.4, 0, 0.2, 1), 
+                  visibility 800ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Elegant pulsing logo and brand name */
+    .brand-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: -0.05em;
+    }
+
+    .brand-title span {
+      text-shadow: 0 0 20px rgba(83, 178, 195, 0.4);
+    }
+
+    /* Premium spinner design */
+    .spinner-inner {
+      box-sizing: border-box;
+      position: absolute;
+      width: 70%;
+      height: 70%;
+      top: 15%;
+      left: 15%;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin-reverse 1.5s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spin-reverse {
+      to { transform: rotate(-360deg); }
+    }
+
+    /* Iframe setup with smooth transition properties */
     iframe {
       border: none;
       width: 100vw;
       height: 100vh;
       display: block;
+      opacity: 0;
+      transform: scale(0.98);
+      transition: opacity 1000ms cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 1000ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Active visibility transitions */
+    #loaderOverlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    iframe.fade-in {
+      opacity: 1;
+      transform: scale(1);
     }
   </style>
 </head>
 <body>
 
-  <iframe src="https://script.google.com/macros/s/AKfycbxuccb1oVZBDrStGWYToOPhd7j1rKrY2zSv21ElLdPXjG-Tf5eSU44WDC45-vfl_xDsWw/exec"></iframe>
+  <!-- Loader Screen Overlay -->
+  <div id="loaderOverlay" class="px-6 text-center">
+    <div class="brand-container text-center mb-8">
+      <h1 class="brand-title text-3xl md:text-4xl font-extrabold text-white">Excel<span class="text-[#53b2c3]">Fusion</span></h1>
+      <p class="text-xs text-slate-400 mt-2 font-medium tracking-widest uppercase">A Better Way to Merge Excel Files</p>
+    </div>
+    
+    <!-- Spinner Area -->
+    <div id="spinnerContainer" class="relative w-14 h-14 mb-6">
+      <div class="box-sizing-border absolute w-full h-full border-4 border-[#53b2c3]/10 border-t-[#53b2c3] rounded-full animate-[spin_1s_linear_infinite]"></div>
+      <div class="box-sizing-border absolute w-[70%] h-[70%] top-[15%] left-[15%] border-4 border-transparent border-b-[#8adcdb] rounded-full animate-[spin-reverse_1.5s_linear_infinite]"></div>
+    </div>
+    
+    <!-- Real-time Loading Status -->
+    <div class="text-xs text-slate-500 font-medium tracking-wide" id="statusMessage">Initializing secure cloud workspace...</div>
+
+    <!-- Interactive Connection Timeout Dialog (Hidden by Default) -->
+    <div id="timeoutDialog" class="hidden max-w-sm p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col items-center shadow-2xl animate-fade-in">
+      <div class="p-3.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-4 animate-pulse">
+        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+      </div>
+      <h4 class="text-sm font-bold text-white mb-2">Connection Timeout Detected</h4>
+      <p class="text-xs text-slate-400 mb-5 leading-relaxed">Workspace is taking longer than expected to load. Google Apps Script might be warming up, or your internet speed is limited.</p>
+      
+      <button onclick="window.location.reload()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#53b2c3] to-[#44a4b5] text-slate-950 text-xs font-bold tracking-wide uppercase hover:from-[#459dae] hover:to-[#3a8e9e] shadow-lg shadow-[#53b2c3]/20 transition duration-150 transform active:scale-95 flex items-center gap-2">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Click here to reload
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Web App Iframe -->
+  <iframe 
+    id="appIframe" 
+    src="https://script.google.com/macros/s/AKfycbxVS8zx2e4h2cyAKAgvOdkfrEwRzZvLVCUCF5aKJyye/exec">
+  </iframe>
+
+  <script>
+    lucide.createIcons();
+
+    const iframe = document.getElementById('appIframe');
+    const loader = document.getElementById('loaderOverlay');
+    const statusMessage = document.getElementById('statusMessage');
+    const spinnerContainer = document.getElementById('spinnerContainer');
+    const timeoutDialog = document.getElementById('timeoutDialog');
+
+    // Dynamic text sequence while booting up
+    const statusSteps = [
+      "Connecting to Google Workspace servers...",
+      "Resolving Excel compilation assets...",
+      "Preparing secure client-side sandbox...",
+      "Finishing rendering workspace layers..."
+    ];
+    
+    let stepIndex = 0;
+    const intervalId = setInterval(() => {
+      if (stepIndex < statusSteps.length) {
+        statusMessage.textContent = statusSteps[stepIndex];
+        stepIndex++;
+      } else {
+        clearInterval(intervalId);
+      }
+    }, 1500);
+
+    // Safeguard: Check for loading timeout (15 seconds threshold)
+    let isIframeLoaded = false;
+    const connectionTimeout = setTimeout(() => {
+      if (!isIframeLoaded) {
+        clearInterval(intervalId);
+        
+        // Transition UI to show the Timeout Dialog smoothly
+        spinnerContainer.classList.add('hidden');
+        statusMessage.classList.add('hidden');
+        
+        timeoutDialog.classList.remove('hidden');
+        console.warn("Workspace taking longer than expected. Please expect the delay.");
+      }
+    }, 15000); // 15 seconds
+
+    // Trigger transition when compilation is complete
+    iframe.onload = function() {
+      isIframeLoaded = true;
+      clearTimeout(connectionTimeout);
+      clearInterval(intervalId);
+      
+      statusMessage.textContent = "Application Ready!";
+      
+      // Delay transition slightly for gorgeous visuals
+      setTimeout(() => {
+        loader.classList.add('fade-out');
+        iframe.classList.add('fade-in');
+      }, 500);
+    };
+  </script>
 
 </body>
 </html>
